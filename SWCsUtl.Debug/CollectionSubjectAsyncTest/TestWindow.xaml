@@ -1,0 +1,36 @@
+﻿<Window x:Class="SWCsUtl.Debug.CollectionSubjectAsyncTest.TestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SWCsUtl.Debug.CollectionSubjectAsyncTest"
+        mc:Ignorable="d"
+        Title="CollectionSubjectAsyncTest" Height="300" Width="400">
+    <Grid>
+        <StackPanel Grid.Row="0">
+            <WrapPanel>
+                <TextBox Text="年齢"/>
+                <TextBox Text="{Binding Path=MinAge}" MinWidth="48"/>
+                <TextBox Text="-"/>
+                <TextBox Text="{Binding Path=MaxAge}" MinWidth="48"/>
+            </WrapPanel>
+            <WrapPanel>
+                <CheckBox IsChecked="{Binding Path=ShowMale}" Content="男"/>
+                <CheckBox IsChecked="{Binding Path=ShowFemale}" Content="女"/>
+            </WrapPanel>
+            <WrapPanel>
+                <CheckBox IsChecked="{Binding Path=IsAsyncMode}" Content="非同期"/>
+            </WrapPanel>
+            <WrapPanel>
+                <Button Content="表示" Command="{Binding Path=QueryCommand}"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Path=Items}"/>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+    </Grid>
+</Window>

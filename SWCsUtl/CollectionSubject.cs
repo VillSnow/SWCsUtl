@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 
 #nullable enable
 
@@ -15,8 +16,11 @@ namespace SWCsUtl {
 
 
 		public delegate void AssignItemDelegate(T existingItem, T newItem);
+		public delegate void SendToUIDelegate(Action action);
 
 		public AssignItemDelegate AssignItem { get; set; } = (T dst, T src) => { };
+
+		public SendToUIDelegate Dispatch { get; set; } = (Action action) => action();
 
 		/// <summary>
 		/// CollectionSubject&lt;T&gt; calls Assign(FallbackValue) if OnError was called and FallbackValue was not null.
@@ -35,7 +39,7 @@ namespace SWCsUtl {
 			var source_ = CollectionTools.EnsureIsReadOnlyList(source);
 
 			if (source_.Count == 0) {
-				Clear();
+				Dispatch(() => Clear());
 				return;
 			}
 
@@ -43,7 +47,7 @@ namespace SWCsUtl {
 			for (i = 0; i < Count && i < source_.Count; ++i) {
 
 				if (Comparer.Equals(this[i], source_[i])) {
-					AssignItem(this[i], source_[i]);
+					Dispatch(() => AssignItem(this[i], source_[i]));
 					continue;
 				}
 
@@ -51,18 +55,18 @@ namespace SWCsUtl {
 				int pos = this.IndexOf(x => Comparer.Equals(x, source_[i]));
 				if (i < pos) {
 					// move if exists and not scanned yet
-					Move(pos, i);
-					AssignItem(this[i], source_[i]);
+					Dispatch(() => Move(pos, i));
+					Dispatch(() => AssignItem(this[i], source_[i]));
 					continue;
 				}
 
 				// if the scanning would be used later
 				if (source_.Contains(this[i], Comparer)) {
 					// keep the scanning
-					Insert(i, source_[i]);
+					Dispatch(() => Insert(i, source_[i]));
 				} else {
 					// overwite the scanning
-					SetItem(i, source_[i]);
+					Dispatch(() => SetItem(i, source_[i]));
 				}
 
 
@@ -70,15 +74,14 @@ namespace SWCsUtl {
 
 			// add rest
 			for (; i < source_.Count; ++i) {
-				Add(source_[i]);
+				Dispatch(() => Add(source_[i]));
 			}
 
 			// remove tail
 			while (i < Count) {
-				RemoveAt(i);
+				Dispatch(() => RemoveAt(i));
 			}
 		}
-
 
 		public void OnNext(IEnumerable<T> value) {
 			if (!isClosed) { Assign(value); }
